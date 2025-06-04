@@ -172,3 +172,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+data/CHUP-040_0001.nii.gz
+data/CHUP-040.nii.gz
+data/CHUP-042_0000.nii.gz
+data/CHUP-042.nii.gz
+csvs/Hecktor22_AugmentedRadiomics.csv
+csvs/Hecktor22_Radiomics.csv

@@ -103,9 +103,12 @@ class ImageContrastShiftTransform:
         self.multiply_filter = ImageMultiplicativeBrightnessTransform(multiplier)
 
     def __call__(self, image):
+        self.stats_image_filter.Execute(image)
+        mean_value = self.stats_image_filter.GetMean()
         mean_value = self.stats_image_filter.GetMean()
         max_value = self.stats_image_filter.GetMaximum()
         min_value = self.stats_image_filter.GetMinimum()
+        print(f"Min: {min_value}, Max: {max_value}")
         image = image - mean_value
         image = self.multiply_filter(image)
         image = image + mean_value
