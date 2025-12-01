@@ -84,6 +84,7 @@ if augmented:
                 true = true.fillna(0)
                 aug_values = aug.values[0]
                 true_values = true.values[0]
+                print(np.isinf(aug_values-true_values).any())
                 euc_distance = distance.euclidean(aug_values, true_values, abs(1 / (true_values) + 1e-3)) / len(aug_values)
                 print(euc_distance)
                 print(euc_distance.shape)
