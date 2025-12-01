@@ -12,6 +12,8 @@ from sksurv.linear_model import CoxnetSurvivalAnalysis
 from icare.survival import BaggedIcareSurvival
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
+from scipy.spatial import distance
+
 from tqdm import tqdm
 
 
@@ -61,11 +63,33 @@ else:
 
 
 if augmented:
+    def get_ridiculous_augments(df: pd.DataFrame, thresh):
+        remove = []
+        for pname in df["Patient Name"].unique():
+            true = copy.deepcopy(df[df["PatientID"]==pname])
+            augs = df[df["Patient Name"]==pname & df["PatientID"]!=pname]
+            print("_____________")
+            print(true["PatientID"])
+            print(augs["PatientID"])
+            print("_____________")
+            del true["PatientID"]
+            del true["PatientName"]
+            for aug_id in augs["PatientID"]:
+                aug = copy.deepcopy(augs[augs["PatientID"]==aug_id])
+                del aug["Patient Name"]
+                del aug["PatientID"]
+                if distance.euclidean(np.array(aug.values), np.array(true), abs(1 / (np.array(true) + .1))) / len(vec) < thresh:
+                    remove.append(aug_id)
+        return remove
+    to_remove = get_ridiculous_augments(df_train,10)
+    df_train = df_train[~df_train["PatientID"].isin(to_remove)]        
+
     print(df_train.shape)
     df_train = pd.merge(df_train, clinical, left_on="Patient Name", right_on="PatientID")
     print(df_train.shape)
     df_train = pd.merge(df_train, endpoints, left_on="Patient Name", right_on="PatientID")
     print(df_train.shape)
+    
 
     df_train = df_train.set_index("Patient ID")
     #del df_train["Patient Name"]
