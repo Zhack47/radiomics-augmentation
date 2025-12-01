@@ -84,7 +84,7 @@ if augmented:
                 true.fillna(0)
                 aug_values = aug.values[0]
                 true_values = true.values[0]
-                if distance.euclidean(aug_values, true_values, abs(1 / (true_values) + .1))) / len(aug_values) < thresh:
+                if distance.euclidean(aug_values, true_values, abs(1 / (true_values) + .1)) / len(aug_values) < thresh:
                     remove.append(aug_id)
         return remove
     to_remove = get_ridiculous_augments(df_train,10)
