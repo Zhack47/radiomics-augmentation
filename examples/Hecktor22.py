@@ -138,17 +138,22 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                 pass
         
         def f_uci(X,Y):
-            Y = Surv.from_arrays(event=[x[0] for x in Y], time=[x[1] for x in Y])
-            scores = []
-            pvals = []
-            for col_nb in tqdm(range(X.shape[1])):
-                fs_model = CoxnetSurvivalAnalysis()
-                fs_model.fit(X[:,col_nb].reshape(-1, 1), Y)
-                corr_score = concordance_index_censored(Y["event"], Y["time"],
-                                                            fs_model.predict(X[:, col_nb].reshape(-1, 1)))
-                scores.append(corr_score[0])
-                pvals.append(1/corr_score[0])
-            return scores, pvals
+            try:
+                return scores_cache, pvals_cache
+            except NameError:
+
+                Y = Surv.from_arrays(event=[x[0] for x in Y], time=[x[1] for x in Y])
+                scores = []
+                pvals = []
+                for col_nb in tqdm(range(X.shape[1])):
+                    fs_model = CoxnetSurvivalAnalysis()
+                    fs_model.fit(X[:,col_nb].reshape(-1, 1), Y)
+                    corr_score = concordance_index_censored(Y["event"], Y["time"],
+                                                                fs_model.predict(X[:, col_nb].reshape(-1, 1)))
+                    scores.append(corr_score[0])
+                    pvals.append(1/corr_score[0])
+                    scores_cache, pvals_cache = copy.deepcopy(scores), copy.deepcopy(pvals)
+                return scores, pvals
         
         selector = SelectKBest(score_func=f_uci, k=thr)
         X_train_selected = selector.fit(X_train_local.values, Y_train_local)
