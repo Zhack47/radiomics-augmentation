@@ -80,7 +80,7 @@ if augmented:
                 del aug["Patient ID"]
                 print(aug.values.shape)
                 print(true.values.shape)
-                if distance.euclidean(np.array(aug.values), np.array(true.values), abs(1 / (np.array(true.values) + .1))) / len(aug.values) < thresh:
+                if distance.euclidean(np.array(aug.values[0]), np.array(true.values[0]), abs(1 / (np.array(true.values[0]) + .1))) / len(aug.values[0]) < thresh:
                     remove.append(aug_id)
         return remove
     to_remove = get_ridiculous_augments(df_train,10)
