@@ -16,7 +16,8 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-
+scores_cache = None
+pvals_cache = None
 augmented=True
 model_name = "FS_SVM" # "icare"
 if augmented:
@@ -138,10 +139,9 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                 pass
         
         def f_uci(X,Y):
-            try:
+            if not (scores_cache is None or pvals_cache is None):
                 return scores_cache, pvals_cache
-            except NameError:
-
+            else:
                 Y = Surv.from_arrays(event=[x[0] for x in Y], time=[x[1] for x in Y])
                 scores = []
                 pvals = []
