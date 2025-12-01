@@ -110,7 +110,7 @@ if augmented:
     censored = [df_train[df_train.index==f"{x}_Identity_Identity"]["Relapse"] for x in ids]
 else:
     censored = df_train["Relapse"]
-for thr in tqdm(range(1,100,5)):
+for thr in tqdm(range(1,df_train.values.shape[1],1)):
     ci_avg_test = 0.
     ci_avg_train = 0.
     cdauc_avg_test=0.
