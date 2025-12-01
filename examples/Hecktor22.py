@@ -82,8 +82,8 @@ if augmented:
                 print(true.values.shape)
                 aug = aug.fillna(0)
                 true = true.fillna(0)
-                print(aug.hasnans())
-                print(true.hasnans())
+                print(aug.isnull().values.any())
+                print(true.isnull().values.any())
                 aug_values = aug.values[0]
                 true_values = true.values[0]
                 if distance.euclidean(aug_values, true_values, abs(1 / (true_values) + .1)) / len(aug_values) < thresh:
