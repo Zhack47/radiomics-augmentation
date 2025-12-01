@@ -73,7 +73,7 @@ if augmented:
             print(augs["Patient ID"])
             print("_____________")
             del true["Patient ID"]
-            del true["PatientName"]
+            del true["Patient Name"]
             for aug_id in augs["Patient ID"]:
                 aug = copy.deepcopy(augs[augs["Patient ID"]==aug_id])
                 del aug["Patient Name"]
