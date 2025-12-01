@@ -155,8 +155,17 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                     scores_cache, pvals_cache = copy.deepcopy(scores), copy.deepcopy(pvals)
                 return scores, pvals
         
-        selector = SelectKBest(score_func=f_uci, k=thr)
-        X_train_selected = selector.fit(X_train_local.values, Y_train_local)
+        try:
+            selector
+        except NameError:
+            selector = SelectKBest(score_func=f_uci, k=thr)
+            X_train_selected = selector.fit(X_train_local.values, Y_train_local)
+        
+        # The _get_support_mask function uses k and is called by transform to select variables
+        # We set k and perform selection on already computed UCI scores
+        print(selector.k, thr)
+        selector.set_params(k=thr)
+        print(selector.k, thr)
         X_train_selected = selector.transform(X_train_local)
         X_test_selected = selector.transform(X_test_local)
 
