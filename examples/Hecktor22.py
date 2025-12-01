@@ -18,11 +18,11 @@ from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
 augmented=False
-
+model_name = "FS_SVM" # "icare"
 if augmented:
-    csv_file = open("../csvs/Perf_Hecktor_augmented.csv", "w")
+    csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
 else:
-    csv_file = open("../csvs/Perf_Hecktor_base.csv", "w")
+    csv_file = open(f"../csvs/Perf_Hecktor_base_{model_name}.csv", "w")
 csv_file.write("nb_variables,CI_train,CI_test,cdAUC_train,cdAUC_test\n")
 if augmented:
     augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics.csv",
@@ -110,7 +110,7 @@ if augmented:
     censored = [df_train[df_train.index==f"{x}_Identity_Identity"]["Relapse"] for x in ids]
 else:
     censored = df_train["Relapse"]
-for thr in tqdm(range(1,488,1)):
+for thr in tqdm(range(1,100,5)):
     ci_avg_test = 0.
     ci_avg_train = 0.
     cdauc_avg_test=0.
@@ -166,11 +166,13 @@ for thr in tqdm(range(1,488,1)):
         X_train_local_np = scaler.fit_transform(X_train_local)
         X_test_local_np = scaler.transform(X_test_local)
 
-        model = BaggedIcareSurvival(n_estimators=100,
+        if model_name == "icare":
+            model = BaggedIcareSurvival(n_estimators=100,
                                     parameters_sets=None,
                                     aggregation_method='median',
                                     n_jobs=-1)
-        model = FastSurvivalSVM()
+        elif model_name == "FS_SVM":
+            model = FastSurvivalSVM()
         model.fit(X_train_local, Y_train_local)
         train_pred = model.predict(X_train_local)
         test_pred = model.predict(X_test_local)
