@@ -67,7 +67,7 @@ if augmented:
         remove = []
         for pname in df["Patient Name"].unique():
             true = copy.deepcopy(df[df["Patient ID"]==pname])
-            augs = df[df["Patient Name"]==pname and df["Patient ID"]!=pname]
+            augs = df[(df["Patient Name"]==pname) (df["Patient ID"]!=pname)]
             print("_____________")
             print(true["Patient ID"])
             print(augs["Patient ID"])
