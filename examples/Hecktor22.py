@@ -66,8 +66,8 @@ if augmented:
     def get_ridiculous_augments(df: pd.DataFrame, thresh):
         remove = []
         for pname in df["Patient Name"].unique():
-            true = copy.deepcopy(df[df["Patient ID"]==pname])
-            augs = df[(df["Patient Name"]==pname) & (df["Patient ID"]!=pname)]
+            true = copy.deepcopy(df[df["Patient ID"]==f"{pname}_Identity_Identity"])
+            augs = copy.deepcopy(df[(df["Patient Name"]==pname) & (df["Patient ID"]!=f"{pname}_Identity_Identity")])
             print("_____________")
             print(true["Patient ID"])
             print(augs["Patient ID"])
