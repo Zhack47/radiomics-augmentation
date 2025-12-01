@@ -78,7 +78,8 @@ if augmented:
                 aug = copy.deepcopy(augs[augs["Patient ID"]==aug_id])
                 del aug["Patient Name"]
                 del aug["Patient ID"]
-                if distance.euclidean(np.array(aug.values), np.array(true), abs(1 / (np.array(true) + .1))) / len(vec) < thresh:
+                print(aug.values)
+                if distance.euclidean(np.array(aug.values), np.array(true.values), abs(1 / (np.array(true.values) + .1))) / len(aug.values) < thresh:
                     remove.append(aug_id)
         return remove
     to_remove = get_ridiculous_augments(df_train,10)
