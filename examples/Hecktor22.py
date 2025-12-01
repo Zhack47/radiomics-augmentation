@@ -66,23 +66,23 @@ if augmented:
     def get_ridiculous_augments(df: pd.DataFrame, thresh):
         remove = []
         for pname in df["Patient Name"].unique():
-            true = copy.deepcopy(df[df["PatientID"]==pname])
-            augs = df[df["Patient Name"]==pname & df["PatientID"]!=pname]
+            true = copy.deepcopy(df[df["Patient ID"]==pname])
+            augs = df[df["Patient Name"]==pname & df["Patient ID"]!=pname]
             print("_____________")
-            print(true["PatientID"])
-            print(augs["PatientID"])
+            print(true["Patient ID"])
+            print(augs["Patient ID"])
             print("_____________")
-            del true["PatientID"]
+            del true["Patient ID"]
             del true["PatientName"]
-            for aug_id in augs["PatientID"]:
-                aug = copy.deepcopy(augs[augs["PatientID"]==aug_id])
+            for aug_id in augs["Patient ID"]:
+                aug = copy.deepcopy(augs[augs["Patient ID"]==aug_id])
                 del aug["Patient Name"]
-                del aug["PatientID"]
+                del aug["Patient ID"]
                 if distance.euclidean(np.array(aug.values), np.array(true), abs(1 / (np.array(true) + .1))) / len(vec) < thresh:
                     remove.append(aug_id)
         return remove
     to_remove = get_ridiculous_augments(df_train,10)
-    df_train = df_train[~df_train["PatientID"].isin(to_remove)]        
+    df_train = df_train[~df_train["Patient ID"].isin(to_remove)]        
 
     print(df_train.shape)
     df_train = pd.merge(df_train, clinical, left_on="Patient Name", right_on="PatientID")
