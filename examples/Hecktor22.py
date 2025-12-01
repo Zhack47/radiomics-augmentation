@@ -82,13 +82,9 @@ if augmented:
                 print(true.values.shape)
                 aug = aug.fillna(0)
                 true = true.fillna(0)
-                print(aug.isnull().values.any())
-                print(true.isnull().values.any())
-                print(np.isinf(aug.values).any())
-                print(np.isinf(true.values).any())
                 aug_values = aug.values[0]
                 true_values = true.values[0]
-                if distance.euclidean(aug_values, true_values, abs(1 / (true_values) + .1)) / len(aug_values) < thresh:
+                if distance.euclidean(aug_values, true_values, max(abs(1 / (true_values)), 1e-3)) / len(aug_values) < thresh:
                     remove.append(aug_id)
         return remove
     to_remove = get_ridiculous_augments(df_train,10)
