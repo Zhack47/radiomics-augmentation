@@ -143,7 +143,7 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
     ci_avg_train = 0.
     cdauc_avg_test=0.
     cdauc_avg_train=0.
-    for split_nb, tr_ids, ts_ids in enumerate(kfold.split(ids, censored)):
+    for split_nb, (tr_ids, ts_ids) in enumerate(kfold.split(ids, censored)):
         print("###############################################")
         train_ids = ids[tr_ids]
         test_ids = ids[ts_ids]
