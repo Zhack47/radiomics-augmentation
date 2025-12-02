@@ -65,7 +65,7 @@ else:
 if augmented:
     def get_ridiculous_augments(df: pd.DataFrame, thresh):
         remove = []
-        for pname in df["Patient Name"].unique():
+        for pname in tqdm(df["Patient Name"].unique()):
             true = copy.deepcopy(df[df["Patient ID"]==f"{pname}_Identity_Identity"])
             augs = copy.deepcopy(df[(df["Patient Name"]==pname) & (df["Patient ID"]!=f"{pname}_Identity_Identity")])
             del true["Patient ID"]
@@ -79,7 +79,6 @@ if augmented:
                 aug_values = aug.values[0]
                 true_values = true.values[0]
                 euc_distance = distance.euclidean(aug_values, true_values, abs(1 / (true_values+1e-3))) / len(aug_values)
-                print(euc_distance)
                 if euc_distance < thresh:
                     remove.append(aug_id)
         return remove
