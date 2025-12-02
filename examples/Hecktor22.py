@@ -78,19 +78,12 @@ if augmented:
                 aug = copy.deepcopy(augs[augs["Patient ID"]==aug_id])
                 del aug["Patient Name"]
                 del aug["Patient ID"]
-                print(aug.values.shape)
-                print(true.values.shape)
                 aug = aug.fillna(0)
                 true = true.fillna(0)
                 aug_values = aug.values[0]
                 true_values = true.values[0]
-                print(np.isinf(aug_values-true_values).any())
-                print(np.isnan(aug_values-true_values).any())
-                print(np.isinf(1/true_values).any())
-                print(np.isnan(1/true_values).any())
-                euc_distance = distance.euclidean(aug_values, true_values, abs(1 / (true_values+1e-3) + 1e-3)) / len(aug_values)
+                euc_distance = distance.euclidean(aug_values, true_values, abs(1 / (true_values+1e-3))) / len(aug_values)
                 print(euc_distance)
-                print(euc_distance.shape)
                 if euc_distance < thresh:
                     remove.append(aug_id)
         return remove
