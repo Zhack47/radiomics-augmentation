@@ -208,27 +208,37 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                                     n_jobs=-1)
         elif model_name == "FS_SVM":
             model = FastSurvivalSVM()
-        model.fit(X_train_local, Y_train_local)
-        train_pred = model.predict(X_train_local)
-        test_pred = model.predict(X_test_local)
 
-        # C-Index
-        ci_train = concordance_index_censored(Y_train_local["event"], Y_train_local["time"], train_pred)
-        ci_test = concordance_index_censored(Y_test_local["event"], Y_test_local["time"], test_pred)
-        ci_avg_train+=ci_train[0]
-        ci_avg_test+=ci_test[0]
-        print(ci_train[0], ci_test[0])
-        
-        # cdAUC
-        time_points_train = np.arange(Y_train_local["time"][np.argpartition(Y_train_local["time"],5)[5]],
-                                                        Y_train_local["time"][np.argpartition(Y_train_local["time"],-5)[-5]], 50)
-        time_points_test = np.arange(Y_test_local["time"][np.argpartition(Y_test_local["time"],5)[5]],
-                                                        Y_test_local["time"][np.argpartition(Y_test_local["time"],-5)[-5]], 50)
-        cdauc_train = cumulative_dynamic_auc(Y_train_local, Y_train_local, train_pred, times=time_points_train)[1]
-        cdauc_test = cumulative_dynamic_auc(Y_train_local, Y_test_local, test_pred, times=time_points_test)[1]
+        citr_loc =0.
+        cits_loc =0.
+        cdatr_loc =0.
+        cdats_loc =0.
+        for i in range(10):
+            model.fit(X_train_local, Y_train_local)
+            train_pred = model.predict(X_train_local)
+            test_pred = model.predict(X_test_local)
+
+            # C-Index
+            ci_train = concordance_index_censored(Y_train_local["event"], Y_train_local["time"], train_pred)
+            ci_test = concordance_index_censored(Y_test_local["event"], Y_test_local["time"], test_pred)
+            
+            
+            # cdAUC
+            time_points_train = np.arange(Y_train_local["time"][np.argpartition(Y_train_local["time"],5)[5]],
+                                                            Y_train_local["time"][np.argpartition(Y_train_local["time"],-5)[-5]], 50)
+            time_points_test = np.arange(Y_test_local["time"][np.argpartition(Y_test_local["time"],5)[5]],
+                                                            Y_test_local["time"][np.argpartition(Y_test_local["time"],-5)[-5]], 50)
+            cdauc_train = cumulative_dynamic_auc(Y_train_local, Y_train_local, train_pred, times=time_points_train)[1]
+            cdauc_test = cumulative_dynamic_auc(Y_train_local, Y_test_local, test_pred, times=time_points_test)[1]
+            citr_loc+=ci_train[0]
+            cits_loc+=ci_test[0]
+            cdatr_loc+=cdauc_train
+            cdats_loc+=cdauc_test
+
+        ci_avg_train+=citr_loc/10
+        ci_avg_test+=cits_loc/10
         cdauc_avg_train+=cdauc_train
         cdauc_avg_test+=cdauc_test
-        print(cdauc_train, cdauc_test)
 
     print(f"Average train CI:{ci_avg_train/5}")
     print(f"Average test CI:{ci_avg_test/5}")
