@@ -68,10 +68,6 @@ if augmented:
         for pname in df["Patient Name"].unique():
             true = copy.deepcopy(df[df["Patient ID"]==f"{pname}_Identity_Identity"])
             augs = copy.deepcopy(df[(df["Patient Name"]==pname) & (df["Patient ID"]!=f"{pname}_Identity_Identity")])
-            print("_____________")
-            print(true["Patient ID"])
-            print(augs["Patient ID"])
-            print("_____________")
             del true["Patient ID"]
             del true["Patient Name"]
             for aug_id in augs["Patient ID"]:
@@ -87,8 +83,11 @@ if augmented:
                 if euc_distance < thresh:
                     remove.append(aug_id)
         return remove
+    print(df_train.shape)
+    print("Removing augmentations too far from reality")
     to_remove = get_ridiculous_augments(df_train,10)
     df_train = df_train[~df_train["Patient ID"].isin(to_remove)]        
+    print(df_train.shape)
 
     print(df_train.shape)
     df_train = pd.merge(df_train, clinical, left_on="Patient Name", right_on="PatientID")
