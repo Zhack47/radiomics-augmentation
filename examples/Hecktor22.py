@@ -201,19 +201,19 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
         X_train_local_np = scaler.fit_transform(X_train_local)
         X_test_local_np = scaler.transform(X_test_local)
 
-        if model_name == "icare":
-            model = BaggedIcareSurvival(n_estimators=100,
-                                    parameters_sets=None,
-                                    aggregation_method='median',
-                                    n_jobs=-1)
-        elif model_name == "FS_SVM":
-            model = FastSurvivalSVM()
-
         citr_loc =0.
         cits_loc =0.
         cdatr_loc =0.
         cdats_loc =0.
         for i in range(10):
+            if model_name == "icare":
+                model = BaggedIcareSurvival(n_estimators=100,
+                                        parameters_sets=None,
+                                        aggregation_method='median',
+                                        n_jobs=-1)
+            elif model_name == "FS_SVM":
+                model = FastSurvivalSVM()
+
             model.fit(X_train_local, Y_train_local)
             train_pred = model.predict(X_train_local)
             test_pred = model.predict(X_test_local)
