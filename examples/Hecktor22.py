@@ -137,12 +137,13 @@ if augmented:
     censored = [df_train[df_train.index==f"{x}_Identity_Identity"]["Relapse"] for x in ids]
 else:
     censored = df_train["Relapse"]
+selectors = [None]*5
 for thr in tqdm(range(1,df_train.values.shape[1],1)):
     ci_avg_test = 0.
     ci_avg_train = 0.
     cdauc_avg_test=0.
     cdauc_avg_train=0.
-    for tr_ids, ts_ids in kfold.split(ids, censored):
+    for split_nb, tr_ids, ts_ids in enumerate(kfold.split(ids, censored)):
         print("###############################################")
         train_ids = ids[tr_ids]
         test_ids = ids[ts_ids]
@@ -175,25 +176,22 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                                                             fs_model.predict(X[:, col_nb].reshape(-1, 1)))
                 scores.append(corr_score[0])
                 pvals.append(1/corr_score[0])
-                scores_cache, pvals_cache = copy.deepcopy(scores), copy.deepcopy(pvals)
             return scores, pvals
         
-        try:
-            selector
-        except NameError:
+        if selectors[split_nb] is None:
             selector = SelectKBest(score_func=f_uci, k=thr)
             X_train_selected = selector.fit(X_train_local.values, Y_train_local)
-        
+            selectors[split_nb] =selector
         # The _get_support_mask function uses k and is called by transform to select variables
         # We set k and perform selection on already computed UCI scores
-        print(selector.k, thr)
-        selector.set_params(k=thr)
-        print(selector.k, thr)
-        X_train_selected = selector.transform(X_train_local)
-        X_test_selected = selector.transform(X_test_local)
+        print(selectors[split_nb].k, thr)
+        selectors[split_nb].set_params(k=thr)
+        print(selectors[split_nb].k, thr)
+        X_train_selected = selectors[split_nb].transform(X_train_local)
+        X_test_selected = selectors[split_nb].transform(X_test_local)
 
-        selected_features = X_train_local.columns[selector.get_support()]
-        f_scores = selector.scores_[selector.get_support()]
+        selected_features = X_train_local.columns[selectors[split_nb].get_support()]
+        f_scores = selectors[split_nb].scores_[selectors[split_nb].get_support()]
         #print(f"Selected Features: {selected_features}")
         #print(f"F-Scores: {f_scores}")
         X_train_local = X_train_local[selected_features]
