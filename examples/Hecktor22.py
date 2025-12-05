@@ -210,7 +210,7 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
         cdats_loc =0.
         for i in range(10):
             if model_name == "icare":
-                model = BaggedIcareSurvival(n_estimators=100,
+                model = BaggedIcareSurvival(n_estimators=10,
                                         parameters_sets=None,
                                         aggregation_method='median',
                                         n_jobs=-1)
