@@ -18,13 +18,15 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=True
+augmented=False
 
 #model_name = "FS_SVM"
-model_name = "icare"
+#model_name = "icare_10"
+#model_name = "icare_100"
+model_name = "cox"
 
 if augmented:
-    csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}10.csv", "w")
+    csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
 else:
     csv_file = open(f"../csvs/Perf_Hecktor_base_{model_name}.csv", "w")
 csv_file.write("nb_variables,CI_train,CI_test,cdAUC_train,cdAUC_test\n")
@@ -209,13 +211,20 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
         cdatr_loc =0.
         cdats_loc =0.
         for i in range(10):
-            if model_name == "icare":
+            if model_name == "icare10":
                 model = BaggedIcareSurvival(n_estimators=10,
+                                        parameters_sets=None,
+                                        aggregation_method='median',
+                                        n_jobs=-1)
+            elif model_name == "icare100":
+                model = BaggedIcareSurvival(n_estimators=100,
                                         parameters_sets=None,
                                         aggregation_method='median',
                                         n_jobs=-1)
             elif model_name == "FS_SVM":
                 model = FastSurvivalSVM()
+            elif model_name == "cox":
+                model = CoxnetSurvivalAnalysis()
 
             model.fit(X_train_local, Y_train_local)
             train_pred = model.predict(X_train_local)
