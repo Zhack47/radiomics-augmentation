@@ -24,7 +24,7 @@ augmented=True
 model_name = "icare"
 
 if augmented:
-    csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
+    csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}10.csv", "w")
 else:
     csv_file = open(f"../csvs/Perf_Hecktor_base_{model_name}.csv", "w")
 csv_file.write("nb_variables,CI_train,CI_test,cdAUC_train,cdAUC_test\n")
