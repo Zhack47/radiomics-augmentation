@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=False
+augmented=True
 
 #model_name = "FS_SVM"
 #model_name = "icare_10"
@@ -149,7 +149,7 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
     cdauc_avg_test=0.
     cdauc_avg_train=0.
     for split_nb, (tr_ids, ts_ids) in enumerate(kfold.split(ids, censored)):
-        print("###############################################")
+        #print("###############################################")
         train_ids = ids[tr_ids]
         test_ids = ids[ts_ids]
         scaler = StandardScaler()
@@ -189,9 +189,7 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
             selectors[split_nb] =selector
         # The _get_support_mask function uses k and is called by transform to select variables
         # We set k and perform selection on already computed UCI scores
-        print(selectors[split_nb].k, thr)
         selectors[split_nb].set_params(k=thr)
-        print(selectors[split_nb].k, thr)
         X_train_selected = selectors[split_nb].transform(X_train_local)
         X_test_selected = selectors[split_nb].transform(X_test_local)
 
