@@ -18,12 +18,12 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=True
+augmented=False
 
 #model_name = "FS_SVM"
-#model_name = "icare_10"
+model_name = "icare_10"
 #model_name = "icare_100"
-model_name = "cox"
+#model_name = "cox"
 
 if augmented:
     csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
