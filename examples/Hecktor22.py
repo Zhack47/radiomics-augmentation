@@ -18,11 +18,11 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=False
+augmented=True
 
 #model_name = "FS_SVM"
-model_name = "icare_10"
-#model_name = "icare_100"
+model_name = "icare10"
+#model_name = "icare100"
 #model_name = "cox"
 
 if augmented:
@@ -209,12 +209,12 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
         cdatr_loc =0.
         cdats_loc =0.
         for i in range(10):
-            if model_name == "icare_10":
+            if model_name == "icare10":
                 model = BaggedIcareSurvival(n_estimators=10,
                                         parameters_sets=None,
                                         aggregation_method='median',
                                         n_jobs=-1)
-            elif model_name == "icare_100":
+            elif model_name == "icare100":
                 model = BaggedIcareSurvival(n_estimators=100,
                                         parameters_sets=None,
                                         aggregation_method='median',
