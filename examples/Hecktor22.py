@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=False
+augmented=True
 
 #model_name = "FS_SVM"
 #model_name = "icare10"
@@ -69,7 +69,8 @@ else:
 # df_train = clinical
 
 
-
+# Maybe we should normalize the whole df,  or at least all samples coming from a same patient
+# before computing the distance
 if augmented:
     def get_ridiculous_augments(df: pd.DataFrame, thresh):
         remove = []
