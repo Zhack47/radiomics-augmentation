@@ -228,7 +228,7 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
             elif model_name == "cox":
                 model = CoxnetSurvivalAnalysis()
             elif model_name == "rsf100":
-                model = RandomSurvivalForest(n_estimators=100)
+                model = RandomSurvivalForest(n_estimators=100, n_jobs=-1)
             elif model_name == "rsf10":
                 model = RandomSurvivalForest(n_estimators=10)
 
