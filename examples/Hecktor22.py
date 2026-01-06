@@ -23,10 +23,10 @@ augmented=True
 
 #model_name = "FS_SVM"
 #model_name = "icare10"
-model_name = "icare100"
+#model_name = "icare100"
 #model_name = "cox"
 #model_name = "rsf10"
-#model_name = "rsf100"
+model_name = "rsf100"
 
 if augmented:
     csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
@@ -93,7 +93,7 @@ if augmented:
         return remove
     print(df_train.shape)
     print("Removing augmentations too far from reality")
-    to_remove = get_ridiculous_augments(df_train,10)
+    to_remove = get_ridiculous_augments(df_train,np.inf)
     df_train = df_train[~df_train["Patient ID"].isin(to_remove)]        
     print(df_train.shape)
 
