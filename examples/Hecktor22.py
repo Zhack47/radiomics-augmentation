@@ -9,7 +9,7 @@ from sksurv.metrics import concordance_index_censored, cumulative_dynamic_auc
 from sklearn.model_selection import StratifiedKFold
 from sksurv.svm import FastSurvivalSVM
 from sksurv.linear_model import CoxnetSurvivalAnalysis
-from sksurv.ensemble import RandomSurvivalForest
+from sksurv.ensemble import RandomSurvivalForest, GradientBoostingSurvivalAnalysis
 from icare.survival import BaggedIcareSurvival
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
@@ -26,7 +26,8 @@ augmented=True
 #model_name = "icare100"
 #model_name = "cox"
 #model_name = "rsf10"
-model_name = "rsf100"
+#model_name = "rsf100"
+model_name = "gb10"
 
 if augmented:
     csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
@@ -231,6 +232,8 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                 model = RandomSurvivalForest(n_estimators=100, n_jobs=-1)
             elif model_name == "rsf10":
                 model = RandomSurvivalForest(n_estimators=10)
+            elif model_name == "gb10":
+                model = GradientBoostingSurvivalAnalysis(n_estimators=10)
 
             model.fit(X_train_local, Y_train_local)
             train_pred = model.predict(X_train_local)
