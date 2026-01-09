@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=False
+augmented=True
 
 #model_name = "FS_SVM"
 #model_name = "icare10"
@@ -27,7 +27,8 @@ augmented=False
 #model_name = "cox"
 #model_name = "rsf10"
 #model_name = "rsf100"
-model_name = "gb10"
+#model_name = "gb10"
+model_name = "gb100"
 
 if augmented:
     csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
@@ -234,7 +235,8 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
                 model = RandomSurvivalForest(n_estimators=10)
             elif model_name == "gb10":
                 model = GradientBoostingSurvivalAnalysis(n_estimators=10)
-
+            elif model_name == "gb100":
+                model = GradientBoostingSurvivalAnalysis(n_estimators=100)
             model.fit(X_train_local, Y_train_local)
             train_pred = model.predict(X_train_local)
             test_pred = model.predict(X_test_local)
