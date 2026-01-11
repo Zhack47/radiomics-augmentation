@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore")
-augmented=True
+augmented=False
 
 #model_name = "FS_SVM"
 #model_name = "icare10"
