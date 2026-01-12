@@ -22,10 +22,10 @@ warnings.filterwarnings("ignore")
 augmented=True
 
 #model_name = "FS_SVM"
-#model_name = "icare10"
+model_name = "icare10"
 #model_name = "icare100"
 #model_name = "cox"
-model_name = "rsf10"
+#model_name = "rsf10"
 #model_name = "rsf100"
 #model_name = "gb10"
 #model_name = "gb100"
