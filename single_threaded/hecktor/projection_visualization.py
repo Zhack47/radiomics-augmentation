@@ -12,7 +12,7 @@ df = pandas.read_csv("../../csvs/Hecktor22_AugmentedRadiomics.csv")
 for column in df.columns:
     if column.split("_")[-1] in ["Elongation", "Flatness", "LeastAxisLength", "MinorAxisLength", "MajorAxisLength"]:
         df[column] = df[column].apply(lambda x: np.real(np.complex64(x)))
-endpoints = pandas.read_csv("/media/zhack/Toshiba/drawer/hecktor2022/hecktor2022_endpoint_training.csv")
+endpoints = pandas.read_csv("../../csvs/hecktor2022_endpoint_training.csv")
 df["Patient Name"] = df["Patient ID"].apply(lambda x: x.split("_")[0])
 
 
@@ -47,7 +47,7 @@ for id_ in tqdm(df["Patient ID"]):
 df = df.drop("RFS", axis=1)
 
 
-thresh = 1e-22
+thresh = 10
 close_vecs = []
 close_rfs = []
 for i, vec in tqdm(enumerate(vecs)):
@@ -65,13 +65,13 @@ for i, vec in tqdm(enumerate(vecs)):
         close_vecs.append(vec)
         close_rfs.append(colors[i])
 print(np.shape(close_vecs))
-# umap.fit(trues)
+umap.fit(trues)
 umap = pickle.load(open("umap.pkl", "rb"))
 
 out_t = umap.transform(trues)
 out = umap.transform(close_vecs)
 print(np.shape(out))
-#pickle.dump(umap, open("umap.pkl", "wb"))
+pickle.dump(umap, open("umap.pkl", "wb"))
 
 fig,ax = plt.subplots()
 

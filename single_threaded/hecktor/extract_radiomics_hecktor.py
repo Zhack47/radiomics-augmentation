@@ -66,7 +66,7 @@ for patient_id in tqdm(list_ids):
 
     # Resample masks to PET image spacing
     mask_tumor = resample_mask(mask_tumor, to=pet_image)
-    mask_node = resample_mask(mask_node, to=pet_image)
+    mask__lymphnode = resample_mask(mask_lymphnode, to=pet_image)
     
     ct_tumor_extractor = Radiomics_Extractor(ct_image, mask_tumor)
     ct_node_extractor = Radiomics_Extractor(ct_image, mask_lymphnode)
