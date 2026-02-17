@@ -10,7 +10,7 @@ def f_uci(X,Y):
             Y = Surv.from_arrays(event=[x[0] for x in Y], time=[x[1] for x in Y])
             scores = []
             pvals = []
-            for col_nb in tqdm(range(X.shape[1])):
+            for col_nb in tqdm(range(X.shape[1]), ncols=64):
                 fs_model = CoxnetSurvivalAnalysis()
                 fs_model.fit(X[:,col_nb].reshape(-1, 1), Y)
                 corr_score = concordance_index_censored(Y["event"], Y["time"],
