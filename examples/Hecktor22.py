@@ -21,7 +21,7 @@ from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
 # Set this to true to include the augmented samples in the training set
-augmented=False
+augmented=True
 n_repeats = 10
 
 # Select the model among the ones available

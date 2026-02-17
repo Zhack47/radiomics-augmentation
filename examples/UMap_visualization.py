@@ -24,8 +24,8 @@ df = pandas.merge(df, endpoints, left_on="Patient Name", right_on="PatientID")
 umap = UMAP(n_components=2)
 
 
-df = df.fillna(0)
-
+#df = df.fillna(0)
+df = df.dropna()
 # Remove Target columns
 df = df.drop("Relapse", axis=1)
 df = df.drop("PatientID", axis=1)
@@ -53,7 +53,7 @@ df = df.drop("RFS", axis=1)
 
 
 
-thresh = 1e-119
+thresh = np.inf
 close_vecs = []
 close_rfs = []
 for i, vec in tqdm(enumerate(vecs)):
@@ -65,12 +65,12 @@ for i, vec in tqdm(enumerate(vecs)):
 print(np.shape(close_vecs))
 
 umap.fit(trues)
-#umap = pickle.load(open("umap.pkl", "rb"))
+umap = pickle.load(open("umap.pkl", "rb"))
 
 out_t = umap.transform(trues)
 out = umap.transform(close_vecs)
 print(np.shape(out))
-pickle.dump(umap, open("umap.pkl", "wb"))
+#pickle.dump(umap, open("umap.pkl", "wb"))
 
 fig,ax = plt.subplots()
 
