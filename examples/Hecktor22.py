@@ -1,7 +1,6 @@
 ## Inspired from https://github.com/Lrebaud/ICARE/blob/main/notebook/reproducing_HECKTOR2022.ipynb
 
 import numpy as np
-import copy
 import warnings
 import pandas as pd
 from sksurv.util import Surv
@@ -9,12 +8,14 @@ from sksurv.metrics import concordance_index_censored, cumulative_dynamic_auc
 from sklearn.model_selection import StratifiedKFold
 from sksurv.svm import FastSurvivalSVM
 from sksurv.linear_model import CoxnetSurvivalAnalysis
-from sksurv.ensemble import RandomSurvivalForest, GradientBoostingSurvivalAnalysis, ComponentwiseGradientBoostingSurvivalAnalysis
+from sksurv.ensemble import RandomSurvivalForest, GradientBoostingSurvivalAnalysis
 from icare.survival import BaggedIcareSurvival
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
-from scipy.spatial import distance
 
+import sys
+sys.path.append("..")
+from utils.training.features.selection import get_duplicates, f_uci
 from tqdm import tqdm
 
 
@@ -38,33 +39,32 @@ models = {"icare10" : BaggedIcareSurvival(n_estimators=10, parameters_sets=None,
 
 # Opening a CSV file to store metric values
 if augmented:
-    csv_file = open(f"../csvs/Perf_Hecktor_augmented_{model_name}.csv", "w")
+    csv_file = open(f"../csvs/Performance/Perf_Hecktor_augmented_{model_name}.csv", "w")
 else:
-    csv_file = open(f"../csvs/Perf_Hecktor_base_{model_name}.csv", "w")
+    csv_file = open(f"../csvs/Performance/Perf_Hecktor_base_{model_name}.csv", "w")
 
 csv_file.write("nb_variables,CI_train,CI_test,cdAUC_train,cdAUC_test,ConfInt\n")
 
 # opaning the original/augmented radiomics
-if augmented:
-    # We have noticed issues with some features (see below)
-    # While we used a defined type while loading the CSV with pandas,
-    # we also built a type check/casting below
-    augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics.csv",
-                                      dtype={"Elongation": float, "Flatness": float,
-                                           "MajorAxisLength": float, "MinorAxisLength": float,
-                                           "LeastAxisLength": float})
+# We have noticed issues with some features (see below)
+# While we used a defined type while loading the CSV with pandas,
+# we also built a type check/casting below
+augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics.csv",
+                                    dtype={"Elongation": float, "Flatness": float,
+                                        "MajorAxisLength": float, "MinorAxisLength": float,
+                                        "LeastAxisLength": float})
 
-    # Type check/casting
-    for column in augmented_radiomics.columns:
-        if column.split("_")[-1] in ["Elongation", "Flatness", "LeastAxisLength", "MinorAxisLength", "MajorAxisLength"]:
-            augmented_radiomics[column] = augmented_radiomics[column].apply(lambda x: np.real(np.complex64(x)))
+# Type check/casting
+for column in augmented_radiomics.columns:
+    if column.split("_")[-1] in ["Elongation", "Flatness", "LeastAxisLength", "MinorAxisLength", "MajorAxisLength"]:
+        augmented_radiomics[column] = augmented_radiomics[column].apply(lambda x: np.real(np.complex64(x)))
 
-    #Retrieving original Patient ID, set in the column Patient Name
-    augmented_radiomics["Patient Name"] = augmented_radiomics["Patient ID"].apply(lambda x: x.split("_")[0])
-else:
-    normal_radiomics = pd.read_csv("../csvs/Hecktor22_Radiomics.csv", index_col="Patient ID")
-    normal_radiomics["Patient Name"] = normal_radiomics.index
+#Retrieving original Patient ID, set in the column Patient Name
+augmented_radiomics["Patient Name"] = augmented_radiomics["Patient ID"].apply(lambda x: x.split("_")[0])
 
+# Loading original radiomics
+normal_radiomics = pd.read_csv("../csvs/Hecktor22_Radiomics.csv", index_col="Patient ID")
+normal_radiomics["Patient Name"] = normal_radiomics.index
 
 # Loading clinical data
 if augmented:
@@ -148,24 +148,11 @@ kfold = StratifiedKFold(5, random_state=np.random.randint(0, 1e9), shuffle=True)
 df_train = df_train.fillna(0)
 
 # Getting and removing duplicate columns
-def get_duplicates(dataframe):
-    columns_to_remove = []
-    list_columns = copy.deepcopy(dataframe.columns)
-    i = 1 
-    for column1 in list_columns:
-        for column2 in list_columns[i:]:
-            if dataframe[column1].equals(dataframe[column2]):
-                columns_to_remove.append(column1)
-                break
-        i+=1
-    return columns_to_remove
-
-duplicate_columns = get_duplicates(df_train)
+duplicate_columns = get_duplicates(normal_radiomics)
 for c in duplicate_columns:
     if c not in ["RFS", "Relapse", "Patient ID"]:
         del df_train[c]
 print(df_train.shape)
-
 
 
 # Gather the censoring information to stratify the 5-folds CV with censoring
@@ -178,6 +165,7 @@ else:
 # The sklearn selectors will be cached to avoid having to recompute
 # feature selection at each iteration
 selectors = [None]*5
+
 # Let's iterate over all the possible numbers of variables
 for thr in tqdm(range(1,df_train.values.shape[1],1)):
     ci_avg_test = 0.
@@ -209,23 +197,11 @@ for thr in tqdm(range(1,df_train.values.shape[1],1)):
             except KeyError:
                 pass
         
-        def f_uci(X,Y):
-            Y = Surv.from_arrays(event=[x[0] for x in Y], time=[x[1] for x in Y])
-            scores = []
-            pvals = []
-            for col_nb in tqdm(range(X.shape[1])):
-                fs_model = CoxnetSurvivalAnalysis()
-                fs_model.fit(X[:,col_nb].reshape(-1, 1), Y)
-                corr_score = concordance_index_censored(Y["event"], Y["time"],
-                                                            fs_model.predict(X[:, col_nb].reshape(-1, 1)))
-                scores.append(corr_score[0])
-                pvals.append(1/corr_score[0])
-            return scores, pvals
-        
         # If the selector was not set for this fold, we put it in the list defined above
         if selectors[split_nb] is None:
             # The selector is built and fitted to the data, but does not select the variables yet at this point
             # This allows us to compute UCI scores only once per fold
+            print(f"Initializing selector for fold {split_nb}")
             selector = SelectKBest(score_func=f_uci, k=thr) 
             X_train_selected = selector.fit(X_train_local.values, Y_train_local)
             selectors[split_nb] =selector
