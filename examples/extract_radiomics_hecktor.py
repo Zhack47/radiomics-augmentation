@@ -19,7 +19,7 @@ images_dir = join(dataset_root, "imagesTr")
 labels_dir = join(dataset_root, "labelsTr")
 list_ids = [i[:-7] for i in sorted(os.listdir(labels_dir))]
 os.makedirs("../csvs", exist_ok=True)
-csv_file = open(join("../csvs", "Hecktor22_Radiomics_test.csv"), "w", encoding="utf-8")
+csv_file = open(join("../csvs", "Hecktor22_Radiomics.csv"), "w", encoding="utf-8")
 
 # Write header
 for patient_id in tqdm(list_ids[0:1]):
