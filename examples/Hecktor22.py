@@ -1,5 +1,6 @@
 ## Inspired from https://github.com/Lrebaud/ICARE/blob/main/notebook/reproducing_HECKTOR2022.ipynb
 
+
 import numpy as np
 import warnings
 import pandas as pd
@@ -21,12 +22,21 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
-# Set this to true to include the augmented samples in the training set
-augmented=True
-n_repeats = 10
+
+if len(sys.argv)!=3:
+    print("Usage python3 Hecktor22.py [model name] [Augmented:(True/False)]")
+    exit()
+
+if sys.argv[2]=="False":
+    augmented = False
+elif sys.argv[2]=="True":
+    augmented=True
+else:
+    raise ValueError("Augmented must be True or False")
+
 
 # Select the model among the ones available
-model_name = "FS-SVM"
+model_name = sys.argv[1]
 models = {"icare10" : BaggedIcareSurvival(n_estimators=10, parameters_sets=None, aggregation_method='median', n_jobs=-1),
           "icare100": BaggedIcareSurvival(n_estimators=100, parameters_sets=None, aggregation_method='median', n_jobs=-1),
           "FS-SVM"  : FastSurvivalSVM(),
@@ -36,6 +46,11 @@ models = {"icare10" : BaggedIcareSurvival(n_estimators=10, parameters_sets=None,
           "gb10"    : GradientBoostingSurvivalAnalysis(n_estimators=10),
           "gb100"   : GradientBoostingSurvivalAnalysis(n_estimators=100)
           }
+
+if model_name not in models.keys():
+    raise ValueError(f"Model {model_name} not found. Please choose among {models.keys()}")
+
+n_repeats = 10
 
 # Opening a CSV file to store metric values
 if augmented:
