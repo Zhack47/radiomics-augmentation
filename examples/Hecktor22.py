@@ -148,6 +148,8 @@ kfold = StratifiedKFold(5, random_state=np.random.randint(0, 1e9), shuffle=True)
 df_train = df_train.fillna(0)
 
 # Getting and removing duplicate columns
+# We used normal_radiomics to remove the same columns regardless of whether
+# augmentations were used or not
 duplicate_columns = get_duplicates(normal_radiomics)
 for c in duplicate_columns:
     if c not in ["RFS", "Relapse", "Patient ID"]:
