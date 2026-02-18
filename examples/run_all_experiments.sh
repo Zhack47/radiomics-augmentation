@@ -5,6 +5,6 @@ do
   for j in True False
   do
     echo Hecktor22 $i $j
-    ../../venv/bin/python3 Hecktor22.py $i $j
+    python3 Hecktor22.py $i $j
   done
 done
