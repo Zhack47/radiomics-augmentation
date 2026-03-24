@@ -1,6 +1,6 @@
 # Radiomics Augmentation
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/mit)
+[![License](https://img.shields.io/badge/License-MIT%202.0-blue.svg)](https://opensource.org/license/mit)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
 Welcome to **Radiomics Augmentation**, a pipeline design to help you apply data augmentation transforms to medical images in order to generate augmented radiomics feature sets.
