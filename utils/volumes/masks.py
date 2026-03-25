@@ -17,15 +17,15 @@ def load_mask(mask_path, label, dtype=sitk.sitkUInt8):
     """
     # Load mask from file
     mask = sitk.ReadImage(mask_path, outputPixelType=dtype)
-    
+
     if isinstance(label, str):
-        if label =="all":  # Fuse all labels together and assign it class 1
+        if label == "all":  # Fuse all labels together and assign it class 1
             mask_np = sitk.GetArrayFromImage(mask)
             np_type = mask_np.dtype
 
             # This line is important the rest is ensuring the proper data type and spatial info
             mask_np_all = (mask_np > 0).astype(np_type) * 1  # Fuse all labels greater than 0
-            
+
             mask_all = sitk.GetImageFromArray(mask_np_all)
             mask_all.CopyInformation(mask)
             mask_all = sitk.Cast(mask_all, dtype)
@@ -35,12 +35,16 @@ def load_mask(mask_path, label, dtype=sitk.sitkUInt8):
     else:
         mask_np = sitk.GetArrayFromImage(mask)
         np_type = mask_np.dtype
-        mask_np_class = (mask_np == label).astype(np_type) * 1  # Keep only the targeted label
-        mask_class= sitk.GetImageFromArray(mask_np_class)
+
+        # Keep only the targeted label
+        mask_np_class = (mask_np == label).astype(np_type) * 1
+
+        mask_class = sitk.GetImageFromArray(mask_np_class)
         mask_class.CopyInformation(mask)
         mask_class = sitk.Cast(mask_class, dtype)
 
         return mask_class
+
 
 def bb_sitk(image: sitk.Image, label=1):
     bbox = sitk.LabelShapeStatisticsImageFilter()
@@ -84,9 +88,12 @@ def apply_numpy_fn(mask, fn, output_is_mask=True):
     else:
         return out
 
+
 def add_pos(mask):
-    mask[0,0,0] = 1
+    mask[0, 0, 0] = 1
+    mask[0, 0, 1] = 1
     return mask
+
 
 def apply_bbox(mask, bbox):
     xmin, xmax, ymin, ymax, zmin, zmax = bbox
