@@ -17,10 +17,12 @@ from utils.volumes.images import load_image
 from utils.volumes.masks import load_mask, bb_sitk, resample_mask, apply_numpy_fn, add_pos
 
 
-EXTRACTORS = {"Shape": RadiomicsShape, "FirstOrder": RadiomicsFirstOrder,
+EXTRACTORS = {"Shape": RadiomicsShape,
+              "FirstOrder": RadiomicsFirstOrder,
               "GLCM": RadiomicsGLCM, "GLSZM": RadiomicsGLSZM,
               "GLRLM": RadiomicsGLRLM, "NGTDM": RadiomicsNGTDM,
-              "GLDM": RadiomicsGLDM}
+              "GLDM": RadiomicsGLDM
+              }
 
 
 def is_feat_method(method_name):
@@ -54,7 +56,6 @@ class Radiomics_Extractor:
         """
         Initializing all the extractors and checking for an empty mask
         """
-
         self.mask_is_empty = False
 
         # Resampling the mask towards the image's space is faster
@@ -71,6 +72,8 @@ class Radiomics_Extractor:
         if not np.all(mask_array == first_value) and np.sum(mask_array) > 1:
             mask = resample_mask(mask, to=image)
             image, mask = crop_image_mask(image, mask)
+            print("Init extractors")
+            
             self.extractors = {extractor_name:
                                EXTRACTORS[extractor_name](image, mask)
                                for extractor_name in EXTRACTORS}
