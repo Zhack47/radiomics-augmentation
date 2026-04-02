@@ -30,12 +30,12 @@ def augment_and_extract(patient, patient_id, image_aug, mask_aug):
           f"_{mask_aug[0]}"
 
     for image in patient["Images"]:
- 
+
         sitk_image = load_image(image)
         transformed_image = image_aug[1](sitk_image)
- 
+
         for mask, label in patient["Masks"]:
- 
+
             sitk_mask = load_mask(mask, label)
             sitk_mask = resample_mask(sitk_mask, sitk_image)
             transformed_mask = mask_aug[1](sitk_mask, sitk_image)
@@ -63,7 +63,8 @@ def augment_and_extract_with_multiprocessing(patients,
     for patient in patients:
         for image_aug in list_image_augmentations:
             for mask_aug in list_mask_augmentations:
-                task_items.append((patients[patient], patient, image_aug, mask_aug))
+                task_items.append((patients[patient], patient,
+                                   image_aug, mask_aug))
 
     r = []
     with multiprocessing.get_context("spawn").Pool(num_processes) as p:
@@ -83,7 +84,7 @@ def augment_and_extract_with_multiprocessing(patients,
                                         'an error message, out of RAM is likely the problem. In that case '
                                         'reducing the number of workers might help')
                 done = [i for i in remaining if r[i].ready()]
-   
+
                 for i in done:
                     row = r[i].get()[0]
                     csv_file.write(row)
@@ -95,14 +96,17 @@ def augment_and_extract_with_multiprocessing(patients,
 
 
 if __name__ == "__main__":
-    root = "/media/zhack/T7/Zach/Data/hecktor2025_small"
+    root = "/mnt/disk_2/Zach/HECKTOR_2025/Task 1"
     patient_ids = [i for i in os.listdir(root) if not i.endswith(".csv")]
 
-    modalities = {"CT": "__CT", "RTDOSE": "__RTDOSE", "PT": "__PT"}
+    # modalities = {"CT": "__CT", "RTDOSE": "__RTDOSE", "PT": "__PT"}
+    modalities = {"CT": "__CT", "PT": "__PT"}
     labels = [1, 2]
 
-    im_augs = [("Noise0.1", ImageNoiseTransform(.1)), ("Noise0.2", ImageNoiseTransform(.2))]
-    masks_augs = [("Dilate4", MaskDilateTransform(4)), ("Dilate2", MaskDilateTransform(2))]
+    im_augs = [("Noise0.1", ImageNoiseTransform(.1)),
+               ("Noise0.2", ImageNoiseTransform(.2))]
+    masks_augs = [("Dilate4", MaskDilateTransform(4)),
+                  ("Dilate2", MaskDilateTransform(2))]
 
     patients = {}
     for pat_id in patient_ids:
@@ -110,9 +114,13 @@ if __name__ == "__main__":
         patients[pat_id]["Images"] = []
         patients[pat_id]["Masks"] = []
         for modality in modalities:
-            patients[pat_id]["Images"].append(join(root, pat_id, f"{pat_id}{modalities[modality]}.nii.gz"))
+            patients[pat_id]["Images"].append(join(root,
+                                                   pat_id,
+                                                   f"{pat_id}{modalities[modality]}.nii.gz"))
         for label in labels:
-            patients[pat_id]["Masks"].append((join(root, pat_id, f"{pat_id}.nii.gz"), label))
+            patients[pat_id]["Masks"].append((join(root,
+                                                   pat_id,
+                                                   f"{pat_id}.nii.gz"), label))
 
     time_0 = time_ns()
     csv_file_ = open("../../csvs/test_mp.csv", "w")
@@ -127,23 +135,25 @@ if __name__ == "__main__":
     header = make_header(list(modalities.keys()), mask_names, feature_names)
     csv_file_.write(header)
     augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
-                                             csv_file_, num_processes=8)
+                                             csv_file_, num_processes=4)
 
-    print((time_ns() - time_0)/1000000000)
+    print((time_ns() - time_0)/1e9)
     print("__________________")
-    exit()
-
+    i = 0
     time_1 = time_ns()
-    for image in images:
-        sitk_image_ = load_image(image)
-        for mask in masks:
-            for label in (1, 2):
-                sitk_mask_ = load_image(image, label)
+    for pat_id in tqdm(patient_ids):
+        for image in patients[pat_id]["Images"]:
+            sitk_image_ = load_image(image)
+            for mask in patients[pat_id]["Masks"]:
+                sitk_mask_ = load_image(mask[0], mask[1])
                 sitk_mask_ = resample_mask(sitk_mask_, sitk_image_)
                 for image_aug in im_augs:
-                    sitk_image_ = image_aug(sitk_image_)
+                    sitk_image_ = image_aug[1](sitk_image_)
                     for mask_aug in masks_augs:
-                        sitk_mask_ = mask_aug(sitk_mask_, sitk_image_)
+                        sitk_mask_ = mask_aug[1](sitk_mask_, sitk_image_)
                         extractor = Radiomics_Extractor(sitk_image_, sitk_mask_)
                         fv = extractor.get_feature_vector()
-    print((time_ns() - time_1)/1000000000)
+                        i += 1
+    print((time_ns() - time_1)/1e9)
+    print(f"Did {i} Iterations")
+    print("__________________")

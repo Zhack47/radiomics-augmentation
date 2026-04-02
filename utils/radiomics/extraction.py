@@ -57,7 +57,6 @@ class Radiomics_Extractor:
         Initializing all the extractors and checking for an empty mask
         """
         self.mask_is_empty = False
-
         # Resampling the mask towards the image's space is faster
         # (NearestNeighbor instead of BSpline..)
         # This code is kept there if we need to do the opposite,
@@ -72,16 +71,15 @@ class Radiomics_Extractor:
         if not np.all(mask_array == first_value) and np.sum(mask_array) > 1:
             mask = resample_mask(mask, to=image)
             image, mask = crop_image_mask(image, mask)
-            print("Init extractors")
-            
+
             self.extractors = {extractor_name:
                                EXTRACTORS[extractor_name](image, mask)
                                for extractor_name in EXTRACTORS}
-            
+
             # Ignoring the annoying symmetrical glcm warning
             if "GLCM" in self.extractors.keys():
                 self.extractors["GLCM"].logger.setLevel(logging.ERROR)
-            
+
             for extractor_name in self.extractors:
                 logger.debug(f"Initializing calculations for {extractor_name}")
                 try:
@@ -91,7 +89,7 @@ class Radiomics_Extractor:
                 logger.debug("Done")
         else:
             mask = resample_mask(mask, to=image)
-            
+
             # Used to initialize the extractors
             false_mask = copy.deepcopy(mask)
 
@@ -120,8 +118,8 @@ class Radiomics_Extractor:
                             except (IndexError, TypeError):
                                 features[f"{extractor_name}_{method_name[3:-12]}"] = method()
                         else:  # Mask is empty, set all feature values to NaN
-                            logger.warning(f"Empty mask found!")
-                            features[f"{extractor_name}_{method_name[3:-12]}"]=np.nan
+                            logger.debug(f"Empty mask found !")
+                            features[f"{extractor_name}_{method_name[3:-12]}"] = np.nan
                     else:
                         pass
                         logger.debug(f"{method_name} is deprecated")
