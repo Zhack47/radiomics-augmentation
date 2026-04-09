@@ -96,7 +96,7 @@ def augment_and_extract_with_multiprocessing(patients,
 
 
 if __name__ == "__main__":
-    root = "/mnt/disk_2/Zach/HECKTOR_2025/Task 1"
+    root = "/media/zhack/T7/Zach/Data/HECKTOR 2025 Training Data Updated(2)/HECKTOR 2025 Training Data/Task 1"
     patient_ids = [i for i in os.listdir(root) if not i.endswith(".csv")]
 
     # modalities = {"CT": "__CT", "RTDOSE": "__RTDOSE", "PT": "__PT"}
@@ -134,8 +134,8 @@ if __name__ == "__main__":
 
     header = make_header(list(modalities.keys()), mask_names, feature_names)
     csv_file_.write(header)
-    augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
-                                             csv_file_, num_processes=4)
+    '''augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
+                                             csv_file_, num_processes=2)'''
 
     print((time_ns() - time_0)/1e9)
     print("__________________")
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         for image in patients[pat_id]["Images"]:
             sitk_image_ = load_image(image)
             for mask in patients[pat_id]["Masks"]:
-                sitk_mask_ = load_image(mask[0], mask[1])
+                sitk_mask_ = load_mask(mask[0], mask[1])
                 sitk_mask_ = resample_mask(sitk_mask_, sitk_image_)
                 for image_aug in im_augs:
                     sitk_image_ = image_aug[1](sitk_image_)
