@@ -51,7 +51,7 @@ if __name__ == "__main__":
     labels = [1, 2]
 
     # Retrieving the list of patient IDs
-    patient_ids = [i[:-7] for i in os.listdir(labels_dir) if not i.endswith(".csv")][:2]
+    patient_ids = [i[:-7] for i in os.listdir(labels_dir) if not i.endswith(".csv")]
 
     # Building the dictionary containing the information
     # (images paths, mask paths and labels) for each patient
