@@ -117,6 +117,7 @@ class MaskSUVThresholdRelativeTransform(MaskLocalTransform):
         max_value = self.max_image_filter.GetMaximum()
 
         self.threshold_image_filter.SetLowerThreshold(self.threshold_prct*max_value)
+        self.threshold_image_filter.SetUpperThreshold(max_value)  # Ensure Lower < Upper
 
         cropped_mask = self.threshold_image_filter.Execute(voi_image)
         return self.revert_crop(mask, cropped_mask)
