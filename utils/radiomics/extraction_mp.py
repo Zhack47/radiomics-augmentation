@@ -63,6 +63,8 @@ def augment_and_extract_with_multiprocessing(patients,
     for patient in patients:
         for image_aug in list_image_augmentations:
             for mask_aug in list_mask_augmentations:
+                print(patients[patient], patient, image_aug, mask_aug)
+                print(type(patients[patient]), type(patient), type(image_aug), type(mask_aug))
                 task_items.append((patients[patient], patient,
                                    image_aug, mask_aug))
 
