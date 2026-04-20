@@ -73,37 +73,50 @@ class MaskDilateTransform:
 
 class MaskSUVThresholdAbsoluteTransform(MaskLocalTransform):
     def __init__(self, threshold):
-        self.threshold = threshold
+        self.threshold = threshold        
+
+    def __call__(self, mask, image):
+        # SwigPyObjects, cannot be pickled for multiprocessing
+        # Hence we define them in the call, not the initialization
         self.threshold_image_filter = sitk.BinaryThresholdImageFilter()
         self.threshold_image_filter.SetLowerThreshold(self.threshold)
         self.threshold_image_filter.SetOutsideValue(0)
         self.threshold_image_filter.SetInsideValue(1)
+
         self.multiply_image_filter = sitk.MultiplyImageFilter()
 
-    def __call__(self, mask, image):
         cropped_mask, image = self.crop(mask, image)
         cropped_mask = sitk.Cast(cropped_mask, sitk.sitkFloat32)
-        voi_image = self.multiply_image_filter.Execute(image, cropped_mask)
-        cropped_mask = self.threshold_image_filter.Execute(voi_image)
-        return self.revert_crop(mask, cropped_mask)
 
+        voi_image = self.multiply_image_filter.Execute(image, cropped_mask)
+
+        cropped_mask = self.threshold_image_filter.Execute(voi_image)
+
+        return self.revert_crop(mask, cropped_mask)
 
 
 class MaskSUVThresholdRelativeTransform(MaskLocalTransform):
     def __init__(self, threshold_prct):
         self.threshold_prct = threshold_prct
+
+    def __call__(self, mask, image):
+        # SwigPyObjects, cannot be pickled for multiprocessing
+        # Hence we define them in the call, not the initialization
         self.threshold_image_filter = sitk.BinaryThresholdImageFilter()
         self.threshold_image_filter.SetOutsideValue(0)
         self.threshold_image_filter.SetInsideValue(1)
         self.multiply_image_filter = sitk.MultiplyImageFilter()
         self.max_image_filter = sitk.MinimumMaximumImageFilter()
 
-    def __call__(self, mask, image):
         cropped_mask, image = self.crop(mask, image)
         cropped_mask = sitk.Cast(cropped_mask, sitk.sitkFloat32)
+
         voi_image = self.multiply_image_filter.Execute(image, cropped_mask)
+
         self.max_image_filter.Execute(voi_image)
         max_value = self.max_image_filter.GetMaximum()
+
         self.threshold_image_filter.SetLowerThreshold(self.threshold_prct*max_value)
+
         cropped_mask = self.threshold_image_filter.Execute(voi_image)
         return self.revert_crop(mask, cropped_mask)

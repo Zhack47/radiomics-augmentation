@@ -28,7 +28,7 @@ def augment_and_extract(patient, patient_id, image_aug, mask_aug):
     ret = f"{patient_id}" \
           f"_{image_aug[0]}" \
           f"_{mask_aug[0]}"
-
+    print(ret)
     for image in patient["Images"]:
 
         sitk_image = load_image(image)
@@ -51,7 +51,6 @@ def augment_and_extract(patient, patient_id, image_aug, mask_aug):
 
         del transformed_image
         del sitk_image
-
     return ret + "\n"
 
 
@@ -63,8 +62,6 @@ def augment_and_extract_with_multiprocessing(patients,
     for patient in patients:
         for image_aug in list_image_augmentations:
             for mask_aug in list_mask_augmentations:
-                print(patients[patient], patient, image_aug, mask_aug)
-                print(type(patients[patient]), type(patient), type(image_aug), type(mask_aug))
                 task_items.append((patients[patient], patient,
                                    image_aug, mask_aug))
 
@@ -98,7 +95,7 @@ def augment_and_extract_with_multiprocessing(patients,
 
 
 if __name__ == "__main__":
-    root = "/media/zhack/T7/Zach/Data/HECKTOR 2025 Training Data Updated(2)/HECKTOR 2025 Training Data/Task 1"
+    root = "/media/zhack/T7/Zach/Data/hecktor2025_small/"
     patient_ids = [i for i in os.listdir(root) if not i.endswith(".csv")]
 
     # modalities = {"CT": "__CT", "RTDOSE": "__RTDOSE", "PT": "__PT"}
@@ -136,8 +133,8 @@ if __name__ == "__main__":
 
     header = make_header(list(modalities.keys()), mask_names, feature_names)
     csv_file_.write(header)
-    '''augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
-                                             csv_file_, num_processes=2)'''
+    augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
+                                             csv_file_, num_processes=2)
 
     print((time_ns() - time_0)/1e9)
     print("__________________")

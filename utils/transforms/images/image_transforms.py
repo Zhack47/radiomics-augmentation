@@ -66,9 +66,13 @@ class ImageSimulateLowResTransform:
     def __init__(self, factor, orders=(sitk.sitkNearestNeighbor, sitk.sitkBSpline)):
         self.factor = factor
         self.order_downsampling, self.order_upsampling = orders
+    
+    def __call__(self, image):
+        # SwigPyObjects, cannot be pickled for multiprocessing
+        # Hence we define them in the call, not the initialization
         self.downsample_image_filter = sitk.ResampleImageFilter()
         self.upsample_image_filter = sitk.ResampleImageFilter()
-    def __call__(self, image):
+
         # Set output spaces
         old_origin = image.GetOrigin()
         old_direction = image.GetDirection()
@@ -98,11 +102,14 @@ class ImageSimulateLowResTransform:
 class ImageContrastShiftTransform:
     def __init__(self, multiplier):
         self.multiplier = multiplier
-        self.stats_image_filter = sitk.StatisticsImageFilter()
-        self.clamp_image_filter = sitk.ClampImageFilter()
         self.multiply_filter = ImageMultiplicativeBrightnessTransform(multiplier)
 
     def __call__(self, image):
+        # SwigPyObjects, cannot be pickled for multiprocessing
+        # Hence we define them in the call, not the initialization
+        self.stats_image_filter = sitk.StatisticsImageFilter()
+        self.clamp_image_filter = sitk.ClampImageFilter()
+        
         self.stats_image_filter.Execute(image)
         mean_value = self.stats_image_filter.GetMean()
         mean_value = self.stats_image_filter.GetMean()
