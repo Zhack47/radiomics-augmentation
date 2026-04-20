@@ -68,7 +68,7 @@ for pat_id in patient_ids:
 
 # Creating the output CSV file
 os.makedirs("../csvs", exist_ok=True)
-csv_file = open(join("../csvs", "Hecktor22_Radiomics.csv"), "w", encoding="utf-8")
+csv_file = open(join("../csvs", "Hecktor22_AugmentedRadiomics_mp.csv"), "w", encoding="utf-8")
 
 # Writing the header of the CSV file
 # This is done by performing a dry-run on toy images and masks
