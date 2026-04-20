@@ -28,7 +28,6 @@ def augment_and_extract(patient, patient_id, image_aug, mask_aug):
     ret = f"{patient_id}" \
           f"_{image_aug[0]}" \
           f"_{mask_aug[0]}"
-    print(ret)
     for image in patient["Images"]:
 
         sitk_image = load_image(image)
