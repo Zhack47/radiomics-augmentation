@@ -9,6 +9,7 @@ import SimpleITK as sitk
 
 logger = logging.getLogger(__name__)
 
+
 class MaskLocalTransform(ABC):
     """Abstract class for local mask transforms. Implements method to act only on part of the mask."""
     def __init__(self):
@@ -32,6 +33,7 @@ class MaskLocalTransform(ABC):
         label_shape_filter.Execute(mask)
         if label_shape_filter.GetNumberOfLabels() == 0:
             logger.warning("No foreground found in the mask.")
+            self.bounding_box = None
             return mask, image
 
         self.bounding_box = label_shape_filter.GetBoundingBox(1) 
@@ -44,11 +46,13 @@ class MaskLocalTransform(ABC):
         return mask, image
 
     def revert_crop(self, mask, cropped_mask):
-        paste_filter = sitk.PasteImageFilter()
-        paste_filter.SetDestinationIndex(self.bounding_box[:3])
-        paste_filter.SetSourceSize(self.bounding_box[3:])
-        mask = paste_filter.Execute(mask, cropped_mask)
+        if self.bounding_box is not None:
+            paste_filter = sitk.PasteImageFilter()
+            paste_filter.SetDestinationIndex(self.bounding_box[:3])
+            paste_filter.SetSourceSize(self.bounding_box[3:])
+            mask = paste_filter.Execute(mask, cropped_mask)
         return mask
+
 
 class MaskIdentityTransform:
     def __init__(self):
@@ -70,6 +74,7 @@ class MaskDilateTransform:
         out_mask = dilate_filter.Execute(mask)
         out_mask.CopyInformation(mask)
         return out_mask
+
 
 class MaskSUVThresholdAbsoluteTransform(MaskLocalTransform):
     def __init__(self, threshold):
