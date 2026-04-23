@@ -16,7 +16,7 @@ from utils.radiomics.extraction import Radiomics_Extractor
 
 
 def make_header(modality_names, mask_names, feature_names):
-    header = "Patient_ID"
+    header = "Patient ID"
     for modality_name in modality_names:
         for mask_name in mask_names:
             for feature_name in feature_names:

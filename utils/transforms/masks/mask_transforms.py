@@ -40,7 +40,7 @@ class MaskLocalTransform(ABC):
 
         self.crop_image_filter = sitk.CropImageFilter()
         self.crop_image_filter.SetLowerBoundaryCropSize(self.bounding_box[:3])
-        self.crop_image_filter.SetLowerBoundaryCropSize(self.bounding_box[:3]+self.bounding_box[3:])
+        self.crop_image_filter.SetLowerBoundaryCropSize(self.bounding_box[:3] + self.bounding_box[3:])
         mask = self.crop_image_filter.Execute(mask)
         image = self.crop_image_filter.Execute(image)
         return mask, image
