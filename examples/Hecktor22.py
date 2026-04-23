@@ -64,7 +64,7 @@ csv_file.write("nb_variables,CI_train,CI_test,cdAUC_train,cdAUC_test,ConfInt\n")
 # We have noticed issues with some features (see below)
 # While we used a defined type while loading the CSV with pandas,
 # we also built a type check/casting below
-augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics.csv",
+augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics_mp.csv",
                                     dtype={"Elongation": float, "Flatness": float,
                                         "MajorAxisLength": float, "MinorAxisLength": float,
                                         "LeastAxisLength": float})
