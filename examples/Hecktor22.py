@@ -15,6 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
 
 import sys
+import copy
 sys.path.append("..")
 from utils.training.features.selection import get_duplicates, f_uci
 from tqdm import tqdm
@@ -45,7 +46,7 @@ models = {"icare10" : BaggedIcareSurvival(n_estimators=10,
                                           parameters_sets=None,
                                           aggregation_method='median',
                                           n_jobs=-1),
-          "FS-SVM"  : FastSurvivalSVM(),
+          "FS-SVM"  : FastSurvivalSVM(max_iter=3),
           "cox"     : CoxnetSurvivalAnalysis(),
           "rsf100"  : RandomSurvivalForest(n_estimators=100, n_jobs=-1),
           "rsf10"   : RandomSurvivalForest(n_estimators=10),
@@ -73,23 +74,24 @@ csv_file.write("Feat_nb,CI_train,CI_test,cdAUC_train,cdAUC_test,ConfInt\n")
 # We have noticed issues with some features (see below)
 # While we used a defined type while loading the CSV with pandas,
 # we also built a type check/casting below
-augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics.csv",
-                                  dtype={"Elongation": float,
-                                         "Flatness": float,
-                                         "MajorAxisLength": float,
-                                         "MinorAxisLength": float,
-                                         "LeastAxisLength": float})
+if augmented:
+    augmented_radiomics = pd.read_csv("../csvs/Hecktor22_AugmentedRadiomics.csv",
+                                    dtype={"Elongation": float,
+                                            "Flatness": float,
+                                            "MajorAxisLength": float,
+                                            "MinorAxisLength": float,
+                                            "LeastAxisLength": float})
 
-# Type check/casting
-for column in augmented_radiomics.columns:
-    if column.split("_")[-1] in ["Elongation", "Flatness", "LeastAxisLength",
-                                 "MinorAxisLength", "MajorAxisLength"]:
-        augmented_radiomics[column] = augmented_radiomics[column].apply(
-            lambda x: np.real(np.complex64(x)))
+    # Type check/casting
+    for column in augmented_radiomics.columns:
+        if column.split("_")[-1] in ["Elongation", "Flatness", "LeastAxisLength",
+                                    "MinorAxisLength", "MajorAxisLength"]:
+            augmented_radiomics[column] = augmented_radiomics[column].apply(
+                lambda x: np.real(np.complex64(x)))
 
-# Retrieving original Patient ID, set in the column Patient Name
-augmented_radiomics["Patient Name"] = augmented_radiomics["Patient ID"].apply(
-    lambda x: x.split("_")[0])
+    # Retrieving original Patient ID, set in the column Patient Name
+    augmented_radiomics["Patient Name"] = augmented_radiomics["Patient ID"].apply(
+        lambda x: x.split("_")[0])
 
 # Loading original radiomics
 normal_radiomics = pd.read_csv("../csvs/Hecktor22_Radiomics.csv",
@@ -191,7 +193,7 @@ duplicate_columns = get_duplicates(normal_radiomics)
 for c in duplicate_columns:
     if c not in ["RFS", "Relapse", "Patient ID"]:
         del df_train[c]
-print(df_train.shape)
+# print(df_train.shape)
 
 
 # Gather the censoring information to stratify the 5-folds CV with censoring
@@ -205,8 +207,9 @@ else:
 # feature selection at each iteration
 selectors = [None]*5
 
+
 # Let's iterate over all the possible numbers of variables
-for thr in tqdm(range(1, df_train.values.shape[1], 1)):
+for thr in tqdm(range(1, 50, 1)):  # df_train.values.shape[1]
     ci_avg_test = 0.
     ci_avg_train = 0.
     cdauc_avg_test = 0.
@@ -221,12 +224,15 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
 
         X_train_local = df_train[df_train["Patient Name"].isin(train_ids)]
         X_test_local = df_train[df_train["Patient Name"].isin(test_ids)]
+        if augmented:
+            X_test_local = X_test_local[X_test_local.index.str.endswith("Identity_Identity")]
+        # X_test_local = df_train[df_train["Patient Name"].isin(test_ids)]
 
-        Y_train_local = Surv.from_arrays(df_train[df_train["Patient Name"].isin(train_ids)]["Relapse"],
-                                         df_train[df_train["Patient Name"].isin(train_ids)]["RFS"])
+        Y_train_local = Surv.from_arrays(X_train_local["Relapse"],
+                                         X_train_local["RFS"])
 
-        Y_test_local = Surv.from_arrays(df_train[df_train["Patient Name"].isin(test_ids)]["Relapse"],
-                                        df_train[df_train["Patient Name"].isin(test_ids)]["RFS"])
+        Y_test_local = Surv.from_arrays(X_test_local["Relapse"],
+                                        X_test_local["RFS"])
 
         banned_features = ["RFS", "Relapse", "Task 1", "Task 2",
                            "CenterID", "Patient Name"]
@@ -236,7 +242,8 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
                 del X_test_local[banned_feature]
             except KeyError:
                 pass
-
+                
+        # X_train_local = X_train_local.astype('float64')
         # If the selector was not set for this fold,
         # we put it in the list defined above
         if selectors[split_nb] is None:
@@ -256,25 +263,25 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
         # X_test_selected = selectors[split_nb].transform(X_test_local)
 
         selected_features = X_train_local.columns[selectors[split_nb].get_support()]
-        f_scores = selectors[split_nb].scores_[selectors[split_nb].get_support()]
+        #f_scores = selectors[split_nb].scores_[selectors[split_nb].get_support()]
 
         X_train_local = X_train_local[selected_features]
         X_test_local = X_test_local[selected_features]
 
         # Using StandardScaler to normalize the data
-        scaler = StandardScaler()
+        # scaler = StandardScaler()
         X_train_local_np = X_train_local.values
         X_test_local_np = X_test_local.values
         
-        #X_train_local_np1 = scaler.fit_transform(X_train_local_np)
-        #X_test_local_np1 = scaler.transform(X_test_local_np)
+        # X_train_local_np = scaler.fit_transform(X_train_local_np)
+        # X_test_local_np = scaler.transform(X_test_local_np)
 
         citr_loc = []
         cits_loc = []
         cdatr_loc = []
         cdats_loc = []
         for i in range(n_repeats):
-            model = models[model_name]
+            model = copy.deepcopy(models[model_name])
 
             # Fit the model on the original/augmented data
             model.fit(X_train_local_np, Y_train_local)
