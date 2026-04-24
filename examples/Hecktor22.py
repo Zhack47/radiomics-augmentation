@@ -265,9 +265,9 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
         scaler = StandardScaler()
         X_train_local_np = X_train_local.values
         X_test_local_np = X_test_local.values
-
-        X_train_local_np = scaler.fit_transform(X_train_local_np)
-        X_test_local_np = scaler.transform(X_test_local)
+        
+        #X_train_local_np1 = scaler.fit_transform(X_train_local_np)
+        #X_test_local_np1 = scaler.transform(X_test_local_np)
 
         citr_loc = []
         cits_loc = []
@@ -279,7 +279,7 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
             # Fit the model on the original/augmented data
             model.fit(X_train_local_np, Y_train_local)
             train_pred = model.predict(X_train_local_np)
-            test_pred = model.predict(X_test_local)
+            test_pred = model.predict(X_test_local_np)
 
             # C-Index
             ci_train = concordance_index_censored(Y_train_local["event"],
@@ -289,11 +289,11 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
 
             # cdAUC 
             # Not thoroughly researched, DISMISS IT PLEASE
-            time_points_train = np.arange(Y_train_local["time"][np.argpartition(Y_train_local["time"],5)[5]],
+            '''time_points_train = np.arange(Y_train_local["time"][np.argpartition(Y_train_local["time"],5)[5]],
                                                                 Y_train_local["time"][np.argpartition(Y_train_local["time"], -5)[-5]], 50)
             time_points_test = np.arange(Y_test_local["time"][np.argpartition(Y_test_local["time"],5)[5]],
                                                               Y_test_local["time"][np.argpartition(Y_test_local["time"], -5)[-5]], 50)
-            '''cdauc_train = cumulative_dynamic_auc(Y_train_local, Y_train_local,
+            cdauc_train = cumulative_dynamic_auc(Y_train_local, Y_train_local,
                                                  train_pred,
                                                  times=time_points_train)[1]
             cdauc_test = cumulative_dynamic_auc(Y_train_local, Y_test_local,
