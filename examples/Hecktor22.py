@@ -209,7 +209,7 @@ selectors = [None]*5
 
 
 # Let's iterate over all the possible numbers of variables
-for thr in tqdm(range(1, 50, 1)):  # df_train.values.shape[1]
+for thr in tqdm(range(1, df_train.values.shape[1], 1)):
     ci_avg_test = 0.
     ci_avg_train = 0.
     cdauc_avg_test = 0.
