@@ -263,7 +263,10 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
 
         # Using StandardScaler to normalize the data
         scaler = StandardScaler()
-        X_train_local_np = scaler.fit_transform(X_train_local)
+        X_train_local_np = X_train_local.values
+        X_test_local_np = X_test_local.values
+
+        X_train_local_np = scaler.fit_transform(X_train_local_np)
         X_test_local_np = scaler.transform(X_test_local)
 
         citr_loc = []
@@ -274,8 +277,8 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
             model = models[model_name]
 
             # Fit the model on the original/augmented data
-            model.fit(X_train_local, Y_train_local)
-            train_pred = model.predict(X_train_local)
+            model.fit(X_train_local_np, Y_train_local)
+            train_pred = model.predict(X_train_local_np)
             test_pred = model.predict(X_test_local)
 
             # C-Index
@@ -290,12 +293,15 @@ for thr in tqdm(range(1, df_train.values.shape[1], 1)):
                                                                 Y_train_local["time"][np.argpartition(Y_train_local["time"], -5)[-5]], 50)
             time_points_test = np.arange(Y_test_local["time"][np.argpartition(Y_test_local["time"],5)[5]],
                                                               Y_test_local["time"][np.argpartition(Y_test_local["time"], -5)[-5]], 50)
-            cdauc_train = cumulative_dynamic_auc(Y_train_local, Y_train_local,
+            '''cdauc_train = cumulative_dynamic_auc(Y_train_local, Y_train_local,
                                                  train_pred,
                                                  times=time_points_train)[1]
             cdauc_test = cumulative_dynamic_auc(Y_train_local, Y_test_local,
                                                 test_pred,
-                                                times=time_points_test)[1]
+                                                times=time_points_test)[1]'''
+            cdauc_train = np.nan
+            cdauc_test = np.nan
+
             citr_loc.append(ci_train[0])
             cits_loc.append(ci_test[0])
             cdatr_loc.append(cdauc_train)
