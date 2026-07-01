@@ -1,5 +1,5 @@
-if __name__ == "__main__"
-    <import os
+if __name__ == "__main__":
+    import os
     import sys
     import logging
     from os.path import join
