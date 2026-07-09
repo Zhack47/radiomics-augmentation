@@ -83,6 +83,6 @@ if __name__ == "__main__":
     header = make_header(list(modalities.keys()), mask_names, feature_names)
     csv_file.write(header)
     augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
-                                             csv_file, spacing=(2, 2, 2),
+                                             csv_file, spacing=(1, 1, 1),
                                              num_processes=32)
     csv_file.close()
