@@ -28,7 +28,16 @@ def resample_image(image, to):
     resampler.SetOutputSpacing(to.GetSpacing())
     resampled_image = resampler.Execute(image)
     return resampled_image
-    
+
+
+def resample_image_to_spacing(image, spacing):
+    resampler = sitk.ResampleImageFilter()
+    resampler.SetInterpolator(sitk.sitkBSpline)
+    resampler.SetOutputDirection(image.GetDirection())
+    resampler.SetOutputOrigin(image.GetOrigin())
+    resampler.SetOutputSpacing(spacing)
+    resampled_image = resampler.Execute(image)
+    return resampled_image
 
 
 if __name__ == "__main__":

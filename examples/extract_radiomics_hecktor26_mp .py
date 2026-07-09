@@ -1,3 +1,22 @@
+import SimpleITK as sitk
+
+
+def resample_to_spacing(image: sitk.Image, spacing):
+    rif = sitk.ResampleImageFilter()
+    rif.SetOutputSpacing(spacing)
+    rif.SetOutputOrigin(image.GetOrigin())
+    rif.SetOutputDirection(image.GetDirection())
+    return rif.Execute(image)
+
+def resample_to_target(src: sitk.Image, target: sitk.Image):
+    rif = sitk.ResampleImageFilter()
+    rif.SetOutputSpacing(target.GetSpacing)
+    rif.SetOutputOrigin(target.GetOrigin())
+    rif.SetOutputDirection(target.GetDirection())
+    rif.SetSize(target.GetSize())
+    return rif.Execute(src)
+
+
 if __name__ == "__main__":
     import os
     import sys
@@ -64,5 +83,6 @@ if __name__ == "__main__":
     header = make_header(list(modalities.keys()), mask_names, feature_names)
     csv_file.write(header)
     augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
-                                            csv_file, num_processes=32)
+                                             csv_file, spacing=(2, 2, 2),
+                                             num_processes=32)
     csv_file.close()

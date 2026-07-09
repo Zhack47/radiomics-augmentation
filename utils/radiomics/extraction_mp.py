@@ -8,7 +8,7 @@ import SimpleITK as sitk
 import numpy as np
 
 sys.path.append("../../")
-from utils.volumes.images import load_image
+from utils.volumes.images import load_image, resample_image_to_spacing
 from utils.volumes.masks import load_mask, resample_mask
 from utils.transforms.masks.mask_transforms import MaskDilateTransform
 from utils.transforms.images.image_transforms import ImageNoiseTransform
@@ -24,13 +24,14 @@ def make_header(modality_names, mask_names, feature_names):
     return header + "\n"
 
 
-def augment_and_extract(patient, patient_id, image_aug, mask_aug):
+def augment_and_extract(patient, patient_id, image_aug, mask_aug, spacing):
     ret = f"{patient_id}" \
           f"_{image_aug[0]}" \
           f"_{mask_aug[0]}"
     for image in patient["Images"]:
 
         sitk_image = load_image(image)
+        resample_image_to_spacing(image, spacing)
         transformed_image = image_aug[1](sitk_image)
 
         for mask, label in patient["Masks"]:
@@ -56,13 +57,14 @@ def augment_and_extract(patient, patient_id, image_aug, mask_aug):
 def augment_and_extract_with_multiprocessing(patients,
                                              list_image_augmentations,
                                              list_mask_augmentations,
-                                             csv_file, num_processes=3):
+                                             csv_file, spacing,
+                                             num_processes=3):
     task_items = []
     for patient in patients:
         for image_aug in list_image_augmentations:
             for mask_aug in list_mask_augmentations:
                 task_items.append((patients[patient], patient,
-                                   image_aug, mask_aug))
+                                   image_aug, mask_aug, spacing))
 
     r = []
     with multiprocessing.get_context("spawn").Pool(num_processes) as p:
@@ -133,7 +135,8 @@ if __name__ == "__main__":
     header = make_header(list(modalities.keys()), mask_names, feature_names)
     csv_file_.write(header)
     augment_and_extract_with_multiprocessing(patients, im_augs, masks_augs,
-                                             csv_file_, num_processes=2)
+                                             csv_file_, spacing=(2, 2, 2),
+                                             num_processes=2)
 
     print((time_ns() - time_0)/1e9)
     print("__________________")
