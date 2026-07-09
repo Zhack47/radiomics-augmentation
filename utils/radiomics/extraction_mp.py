@@ -31,7 +31,7 @@ def augment_and_extract(patient, patient_id, image_aug, mask_aug, spacing):
     for image in patient["Images"]:
 
         sitk_image = load_image(image)
-        resample_image_to_spacing(image, spacing)
+        sitk_image = resample_image_to_spacing(sitk_image, spacing)
         transformed_image = image_aug[1](sitk_image)
 
         for mask, label in patient["Masks"]:
